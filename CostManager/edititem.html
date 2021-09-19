@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="themes/theme1.min.css" />
+    <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
+    <script src="CostManager.js"></script>
+    <script src="Item.js"></script>
+    <title>ToDo List</title>
+</head>
+<body>
+<style>
+    #errorMsg {
+        color: red;
+        text-align: center;
+    }
+</style>
+<div data-role="page" id="home">
+    <div data-role="header">
+        <h1>Cost Manager Project</h1>
+    </div>
+    <div data-role="content">
+        <form>
+            <h2 id="errorMsg" color=red></h2>
+
+            title: <input type="text" id="title"/>
+            <br/>
+            description: <input type="text" id="description"/>
+            <br/>
+            select category:
+            <br/>
+            <select id="category-select" name="category">
+                <option value="" selected disabled hidden></option>
+            </select>
+            new category: <input type="text" id="newCategory">
+            <br/>
+            <label for="date">Start date:</label>
+            <input type="date" id="date" name="trip-start" placeholder="dd-mm-yyyy">
+            <br/>
+            amount: <input type="number" id="amount"/>
+            <br/>
+            price: <input type="number" id="price"/>
+            <br/>
+            <input type="button" value="Save Item" id="save" />
+            <input type="button" value="Back" id="back" />
+            <br/>
+            <div id="message"></div>
+        </form>
+
+    </div>
+    <script>
+
+        var data = localStorage.getItem("item_id");//get id of selected item
+        var itemId = data;
+        window.CostManager.loadUI = function () {
+            if(data!=null){//load selected item to ui
+                let item = window.CostManager.findItem(data);
+                localStorage.removeItem("item_id")
+                var title = document.getElementById("title").value;
+                var description = document.getElementById("description").value;
+                var amount = document.getElementById("amount").value;
+                var price = document.getElementById("price").value;
+
+                document.getElementById("title").value = item.name;
+                document.getElementById("description").value = item.description;
+                document.getElementById("amount").value = item.amount;
+                document.getElementById("price").value = item.price;
+
+
+                var jsonDataForCategory = window.CostManager.getCategories();
+                for (var field in jsonDataForCategory) {
+                    $('<option value="'+ jsonDataForCategory[field] +'">' + jsonDataForCategory[field] + '</option>').appendTo('#category-select');
+                }
+                //set category selector values
+                var options = document.getElementById("category-select").options;
+                for ( var i = 0; i < options.length; i++) {
+                    if (options[i].value.toString().valueOf() == item.category.toString().valueOf()) {
+                        options[i].selected = true;
+                        break;
+                    }
+
+                }
+                document.getElementById("date").valueAsDate = new Date(item.year,item.month-1,item.day+1);
+
+
+
+
+
+            }
+        }
+        window.CostManager.loadUI();
+
+
+        window.CostManager.handleSaveButtonClick = function() {//save edited item button
+
+            var ob = {};
+            var title = document.getElementById("title").value;
+            var description = document.getElementById("description").value;
+            var selector =document.getElementById("category-select")
+            var category = selector.options[selector.selectedIndex].value;
+            var amount = document.getElementById("amount").value;
+            var price = document.getElementById("price").value;
+            var date = new Date($('#date').val());
+            if(title != "" && description != "" && amount !="" && price !=""){
+                if(category.toString().valueOf() == "New Category"){//check if new category is selected
+                    category = document.getElementById("newCategory").value;
+                }
+                if(category.toString().valueOf() == ""){//category field is empty
+                    document.getElementById("errorMsg").innerHTML = "You need to select category";
+                    return;
+                }
+                document.getElementById("errorMsg").innerHTML = "";
+                try {
+                    window.CostManager.updateItem(itemId,title,description,category,date,amount,price);//update item in db
+                }
+                catch (exception){
+                    document.getElementById("errorMsg").innerHTML = exception;//print error message
+                }
+            }
+
+        }
+        window.CostManager.handleBackButtonClick = function (){//back button
+            location.href = "showitems.html";
+        }
+        document.getElementById("back").addEventListener("click",window.CostManager.handleBackButtonClick);
+        document.getElementById("save").addEventListener("click", window.CostManager.handleSaveButtonClick);
+
+
+
+        window.CostManager.handleCategorySelect = function (){//disable and enable the new category field
+            var selector =document.getElementById("category-select")
+            var selectedCategory = selector.options[selector.selectedIndex].value;
+            if(selectedCategory == "New Category"){
+                document.getElementById("newCategory").disabled = false;
+            }
+            else {
+                document.getElementById("newCategory").disabled = true;
+            }
+
+            window.CostManager.addCategory(selectedCategory);
+
+        }
+
+        document.getElementById("category-select").addEventListener('change',window.CostManager.handleCategorySelect)
+        $(document).ready(function(){
+            document.getElementById("newCategory").disabled = true;
+
+        });
+
+    </script>
+    <div data-role="footer">
+        <h4>   </h4>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="themes/theme1.min.css" />
+    <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
+    <script src="CostManager.js"></script>
+    <script src="Item.js"></script>
+    <title>ToDo List</title>
+
+
+</head>
+<body>
+<style>
+    #errorMsg {
+        color: red;
+        text-align: center;
+    }
+</style>
+<div data-role="page" id="home">
+    <div data-role="header">
+        <h1>Cost Manager Project</h1>
+    </div>
+    <div data-role="content">
+        <a href="showitems.html"data-ajax="false" data-role="button" data-inline="true" >all items</a>
+        <form>
+            <h2 id="errorMsg" color=red></h2>
+
+            title: <input type="text" id="title"/>
+            <br/>
+            description: <input type="text" id="description"/>
+            <br/>
+            select category:
+            <br/>
+            <select id="category-select" name="category">
+                <option value="" selected disabled hidden>Choose here</option>
+            </select>
+            new category: <input type="text" id="newCategory" >
+            <br/>
+            amount: <input type="number" id="amount"/>
+            <br/>
+            price: <input type="number" id="price"/>
+            <br/>
+            <input type="button" value="Add Item" id="add" />
+            <br/>
+            <div id="message"></div>
+            <div id="category"></div>
+        </form>
+
+    </div>
+    <script>
+
+
+
+        $(document).ready(function() {
+            window.CostManager.handleSaveButtonClick = function() {//save button
+                var selector =document.getElementById("category-select")
+                var selectedCategory = selector.options[selector.selectedIndex].value;
+
+                var ob = {};
+                var title = document.getElementById("title").value;
+                var description = document.getElementById("description").value;
+                var amount = document.getElementById("amount").value;
+                var price = document.getElementById("price").value;
+                if(title != "" && description != "" && amount !="" && price !=""){
+                    if(selectedCategory.toString().valueOf() == "New Category"){
+                        selectedCategory = document.getElementById("newCategory").value;
+                    }
+                    if(selectedCategory.toString().valueOf() != ""){
+                        try {
+                            window.CostManager.addItem(title,description,selectedCategory,amount,price);//add item to db
+                            document.getElementById("title").value = "";
+                            document.getElementById("description").value = "";
+                            document.getElementById("amount").value = "";
+                            document.getElementById("price").value = "";
+                            document.getElementById("newCategory").value = "";
+                            document.getElementById("errorMsg").innerHTML = "";
+
+                            //update categories selector if new category was added
+                            var jsonDataForCategory = window.CostManager.getCategories();
+                            $("#category-select").empty();
+                            for (var field in jsonDataForCategory) {
+                                $('<option value="'+ jsonDataForCategory[field] +'">' + jsonDataForCategory[field] + '</option>').appendTo('#category-select');
+                            }
+                        }
+                        catch (exception){
+                            //print error message
+                            alert(exception);
+                            document.getElementById("errorMsg").innerHTML = exception;
+                        }
+
+                    }
+                    else {
+                        //print error message
+                        document.getElementById("errorMsg").innerHTML = "You need to select category";
+
+                    }
+
+                }
+
+            }
+            document.getElementById("add").addEventListener("click", window.CostManager.handleSaveButtonClick);
+
+
+
+            var jsonDataForBrands = window.CostManager.getCategories();
+            for (var field in jsonDataForBrands) {
+                $('<option value="'+ jsonDataForBrands[field] +'">' + jsonDataForBrands[field] + '</option>').appendTo('#category-select');
+            }
+            window.CostManager.handleCategorySelect = function (){//load categories to selector
+                var selector =document.getElementById("category-select")
+                var selectedCategory = selector.options[selector.selectedIndex].value;
+                if(selectedCategory == "New Category"){
+                    document.getElementById("newCategory").disabled = false;
+                }
+                else {
+                    document.getElementById("newCategory").disabled = true;
+                }
+
+                window.CostManager.addCategory(selectedCategory);
+
+            }
+            document.getElementById("newCategory").disabled = true;
+
+            document.getElementById("category-select").addEventListener('change',window.CostManager.handleCategorySelect)
+
+
+
+        });
+    </script>
+    <div data-role="footer">
+        <h4>  </h4>
+    </div>
+</div>
+</body>
+</html>

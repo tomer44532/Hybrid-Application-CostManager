@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js" type="text/javascript"></script>
+    <script src="../../CostManagerProject/CostManager/CostManager.js"></script>
+    <script src="../../CostManagerProject/CostManager/Item.js"></script>
+</head>
+<body>
+<script>
+        $(document).ready(function (){
+
+
+                window.CostManager.clearDb = function () {
+                    window.CostManager.clearItems(true);
+                    window.CostManager.clearCategories(true);
+                    window.CostManager.clearIds(true);
+                }
+
+                window.CostManager.testAddItem = function(){//tests addItem
+                    window.CostManager.clearDb();
+                    var size = window.CostManager.getItems(true).length;
+                    var vec =window.CostManager.getItems(true);
+
+                    try{
+                        window.CostManager.addItem("title","description","category",-5,2,true);
+                    }
+                    catch (e){
+                        if(e.toString().valueOf() != "Amount must be greater then 0".valueOf()){
+                            console.log("addItem not working");
+                            return;
+                        }
+                        window.CostManager.addItem("title","description","category",5,3,true);
+                        if(vec.length = size +1){
+                            console.log("addItem is working");
+                        }
+                        else{
+                            console.log("addItem not working");
+                        }
+
+                    }
+
+
+
+                };
+
+            window.CostManager.testFindItem = function () {//test findItem
+                window.CostManager.clearDb();
+                window.CostManager.addItem("title","description","category",5,3,true);
+                var item1 = window.CostManager.findItem(60,true);
+                if(item1 != undefined){
+                    console.log("findItem is not working");
+                    return;
+                }
+                var item2 = window.CostManager.findItem(0,true);
+                if(item2.name == "title" && item2.description == "description" && item2.category == "category"&& item2.amount == 5&& item2.price == 3){
+                    console.log("findItem is working")
+                }
+                else {
+                    console.log("findItem is not working")
+                }
+            }
+
+
+            window.CostManager.testEditItem =function(){//test editItem
+                window.CostManager.clearDb();
+                window.CostManager.addItem("title","description","category",5,3,true);
+                var date = new Date();
+                window.CostManager.updateItem(0,"title2","description2","category2",date,5,3,true);
+                var item = window.CostManager.getItems(true)[0];
+                if(item.name == "title2" && item.description == "description2" && item.category == "category2"){
+                    console.log("updateItem is working");
+                }
+                else{
+                    console.log("updateItem is not working");
+                }
+
+
+            };
+
+            window.CostManager.testGetItemsPerMonth = function(){//test getItemsPerMonth
+                window.CostManager.clearDb();
+                window.CostManager.addItem("title1","description1","category1",2,3,true);
+                window.CostManager.addItem("title2","description2","category2",6,1,true);
+                window.CostManager.addItem("title3","description3","category3",8,3,true);
+                window.CostManager.addItem("title4","description4","category4",5,9,true);
+                var date1 = new Date();
+                date1.setMonth(3);
+                var date2 = new Date();
+                date1.setMonth(5);
+                window.CostManager.updateItem(0,"title1","description1","category1",date1,2,3,true)
+                window.CostManager.updateItem(1,"title2","description2","category2",date1,6,1,true)
+                window.CostManager.updateItem(2,"title3","description3","category3",date2,8,3,true)
+                window.CostManager.updateItem(3,"title4","description4","category4",date1,5,9,true)
+                var items = window.CostManager.getItemsPerMonth(3,true);
+                if(items.length == 3){
+                    console.log("getItemsPerMonth is working");
+                }
+                else{
+                    console.log("getItemsPerMonth is working");
+                }
+            };
+
+            window.CostManager.testAddCategory = function () {//tset addCategory
+                window.CostManager.clearDb();
+                var size = window.CostManager.getCategories(true).length;
+                window.CostManager.addCategory("category",true);
+                var categories = window.CostManager.getCategories(true);
+                if(categories.length == size +1){
+                    console.log("addCategory is working");
+                }
+                else {
+                    console.log("addCategory is not working");
+                }
+            }
+
+            window.CostManager.testGetCategoryAmount = function () {//getCategoryAmount
+                window.CostManager.clearDb();
+                window.CostManager.addItem("title1","description1","category1",2,3,true);
+                window.CostManager.addItem("title2","description2","category1",6,1,true);
+                window.CostManager.addItem("title3","description3","category2",8,3,true);
+                window.CostManager.addItem("title4","description4","category1",5,9,true);
+
+                var amount = window.CostManager.getCategoryAmount("category1",true);
+                if(amount == 3){
+                    console.log("getCategoryAmount is working");
+                }
+                else {
+                    console.log("getCategoryAmount is not working");
+
+                }
+            }
+
+
+
+
+            window.CostManager.testAddItem();
+            window.CostManager.testFindItem();
+            window.CostManager.testEditItem();
+            window.CostManager.testGetItemsPerMonth();
+            window.CostManager.testAddCategory();
+            window.CostManager.testGetCategoryAmount();
+
+
+        })
+
+
+
+    </script>
+</body>
+</html>

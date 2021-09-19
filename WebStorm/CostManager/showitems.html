@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>todo list</title>
+    <link rel="stylesheet" href="themes/theme1.min.css" />
+    <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js" type="text/javascript"></script>
+    <script src="CostManager.js"></script>
+    <script src="Item.js"></script>
+</head>
+<body>
+<div data-role="page" id="home">
+    <div data-role="header">
+        <h1>Cost Manager Project</h1>
+    </div>
+
+    <div data-role="content" >
+
+        <a href="additem.html"data-ajax="false" data-role="button" data-inline="true" data-rel = "dialog"  >add item</a>
+        <br/>
+        <a href="itemschart.html" data-ajax="false"data-role="button" data-inline="true">items chart</a>
+        <form>
+            <h2 id="errorMsg" color=red></h2>
+            filter month: <input type="number"min="1" max="12" id="filter"/>
+            <br/>
+            <input type="button" value="Filter list" id="filterBtn"/>
+            <input type="button" value="ResetFilter" id="resetFilterBtn"/>
+            <br/>
+        </form>
+        <ul data-role="listview" id="list">
+        </ul>
+    </div>
+
+    <div data-role="footer">
+        <h4>   </h4>
+    </div>
+</div>
+<script  type="text/javascript">
+    $(document).ready(function () {
+        (
+            window.CostManager.initializeList = function() {
+                document.getElementById("errorMsg").innerHTML = "";
+
+                var list = document.getElementById('list');
+                var myList = $('#list');
+                myList.empty();
+
+                //load items into the list
+                var vec = window.CostManager.getItems();
+                vec.forEach(
+                    function (ob) {
+                        var item = new Item(ob);
+                        var li = document.createElement("li");
+                        var a = document.createElement("a");
+                        var text = document.createTextNode(item.name);
+                        var description = document.createTextNode(item.description);
+                        description.fontSize = "10px"
+                        a.appendChild(text);
+                        a.appendChild(document.createElement("br"))
+                        a.appendChild(description);
+                        a.setAttribute("href", "#");
+                        li.appendChild(a);
+                        li.onclick = function (){
+                            localStorage.setItem("item_id",item.myId);
+                            location.href = "edititem.html?";
+                        }
+                        list.appendChild(li);
+                    }
+                );
+
+                myList.listview().listview('refresh');
+
+            })();
+        window.CostManager.handleFilterButtonClick = function(){//filter button
+            var month = document.getElementById("filter").value;
+            if(month >0 && month < 13){
+                document.getElementById("errorMsg").innerHTML = "";
+                var list = document.getElementById('list');
+                var myList = $('#list');
+
+                myList.empty();
+
+
+                var vec = window.CostManager.getItemsPerMonth(document.getElementById("filter").value);//load items from db by selected month
+                vec.forEach(
+                    function (ob) {
+                        var item = new Item(ob);
+                        var li = document.createElement("li");
+                        var a = document.createElement("a");
+                        var text = document.createTextNode(item.name);
+                        var description = document.createTextNode(item.description);
+                        description.fontSize = "10px"
+                        a.appendChild(text);
+                        a.appendChild(document.createElement("br"))
+                        a.appendChild(description);
+                        a.setAttribute("href", "#");
+                        li.appendChild(a);
+                        li.onclick = function (){
+                            localStorage.setItem("item_id",item.myId);
+                            location.href = "edititem.html"
+                        }
+                        list.appendChild(li);
+                    }
+                );
+
+                myList.listview().listview('refresh');
+            }
+            else {
+                document.getElementById("errorMsg").innerHTML = "Month must be between 1 to 12";
+            }
+
+        }
+        document.getElementById("filterBtn").addEventListener("click", window.CostManager.handleFilterButtonClick);
+
+        window.CostManager.handleResetButtonClick = function (){
+
+        }
+        document.getElementById("resetFilterBtn").addEventListener("click", window.CostManager.initializeList);
+    })
+
+
+</script>
+</body>
+</html>
